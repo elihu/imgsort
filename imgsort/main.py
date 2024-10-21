@@ -6,9 +6,15 @@ from datetime import datetime
 import re
 from hachoir.parser import createParser
 from hachoir.metadata import extractMetadata
+from rich import print
+import typer
+import calendar
 
+app = typer.Typer()
+
+# Internal functions
 def extract_metadata(image_path):
-    """Extrae los metadatos de una imagen y devuelve un diccionario."""
+    """Extracts image metadata and returns a dict."""
     try:
         image = Image.open(image_path)
         exif_data = image._getexif()
@@ -23,7 +29,7 @@ def extract_metadata(image_path):
     return metadata
 
 def organize_images(source_dir, dest_dir):
-    """Organiza las imágenes en carpetas basadas en sus metadatos."""
+    """Organize images in directories based on metadata."""
     if not os.path.exists(dest_dir):
         os.makedirs(dest_dir)
 
@@ -35,10 +41,10 @@ def organize_images(source_dir, dest_dir):
                 
                 # print(metadata)
                 
-                # Extraer el modelo de la cámara
+                # Extracts camera model
                 camera_model = metadata.get('Model', 'Unknown-Camera').replace(' ', '').replace('\0', '')
 
-                # Extraer la fecha de creación
+                # Extracts creation date
                 date_taken = metadata.get('DateTimeOriginal')
                 if not date_taken:
                     date_taken = metadata.get('DateTime')
@@ -49,7 +55,7 @@ def organize_images(source_dir, dest_dir):
                     year_taken = date_taken.split('-')[0]
                     month_taken = date_taken.split('-')[1]
                 else:
-                    #intentar sacar fechas del filename con regex sino ya ir con el mtime
+                    # tries to get creation date from filename with regex if not, tries to get modification time
                     whatsapp_img = r'IMG-(\d{4})(\d{2})(\d{2})-WA(\d{2})(\d{2})'
                     whatsapp_old = r'IMG_(\d{4})(\d{2})(\d{2})_(\d{2})(\d{2})'
                     match = re.search(whatsapp_img, file) or re.search(whatsapp_old, file)
@@ -85,17 +91,17 @@ def organize_images(source_dir, dest_dir):
                                     date_taken = "Unknown-Date"
                                     newname = file
 
-                # Crear el camino de la carpeta de destino
+                # Creates dest dir
                 if year_taken:
                     target_folder = os.path.join(dest_dir, year_taken, month_taken)
                 else:
                     target_folder = os.path.join(dest_dir, date_taken)
 
-                # Crear las carpetas si no existen
+                # Creates dirs if not exist
                 os.makedirs(target_folder, exist_ok=True)
 
-                # Copia el archivo a la nueva ubicación con nombre normalizado
-                print(f'Copiando: {image_path} -> {newname}')
+                # Copies file to new dest with normalized name
+                print(f'Copying: {image_path} -> {newname}')
                 try:
                     shutil.copy2(image_path, os.path.join(target_folder, newname))
                 except Exception as e:
@@ -103,7 +109,7 @@ def organize_images(source_dir, dest_dir):
                 # print(f'Copiado: {file} -> {target_folder}')
 
 def organize_videos(source_dir, dest_dir):
-    """Organiza las imágenes en carpetas basadas en sus metadatos."""
+    """Organize images in directories based on metadata."""
     if not os.path.exists(dest_dir):
         os.makedirs(dest_dir)
 
@@ -111,10 +117,10 @@ def organize_videos(source_dir, dest_dir):
         for file in files:
             if file.lower().endswith(('avi', 'mp4', 'mpg', 'wmv', 'mov')):
                 year_taken = ''
-                month_taken = ''
-                date_taken = 'Unknown-Date'
-                newname = file
                 video_path = os.path.join(root, file)
+                if os.path.getsize(video_path) == 0:
+                    print("Warn. Skipping null size file")
+                    continue
                 parser = createParser(video_path)
                 if not parser:
                     print("Unable to parse file %s" % video_path)
@@ -128,10 +134,12 @@ def organize_videos(source_dir, dest_dir):
                 if metadata:
                     for line in metadata.exportPlaintext():
                         if line.split(':')[0].lower() == '- creation date':
-                            dateobj = datetime.strptime(line.split('date: ')[1], "%Y-%m-%d %H:%M:%S")
-                            year_taken = str(dateobj.year)
-                            month_taken = str(dateobj.month)
-                            print(dateobj)
+                            date_taken = datetime.strptime(line.split('date: ')[1], "%Y-%m-%d %H:%M:%S")
+                            newname = f"{str(date_taken).replace('-', '_').replace(':', '_').replace(' ', '-')}"
+                            year_taken = str(date_taken.year)
+                            if year_taken == '1904':
+                                year_taken = ''
+                            month_taken = f'{str(date_taken.month)}-{calendar.month_abbr[date_taken.month]}'
 
                 if not year_taken:
                     # mtime date
@@ -140,31 +148,41 @@ def organize_videos(source_dir, dest_dir):
                         date_taken = datetime.fromtimestamp(m_time)
                         newname = f"{str(date_taken).replace('-', '_').replace(':', '_').replace(' ', '-')}"
                         year_taken = str(date_taken.year)
-                        month_taken = str(date_taken.month)
+                        month_taken = f'{str(date_taken.month)}-{calendar.month_abbr[date_taken.month]}'
                     else:
                         date_taken = "Unknown-Date"
                         newname = file
         
-                # Crear el camino de la carpeta de destino
+                # Creates dest dir
                 if year_taken:
                     target_folder = os.path.join(dest_dir, year_taken, month_taken)
                 else:
-                    target_folder = os.path.join(dest_dir, date_taken)
+                    target_folder = os.path.join(dest_dir, str(date_taken))
 
-                # Crear las carpetas si no existen
+                # Creates dirs if not exist
                 os.makedirs(target_folder, exist_ok=True)
 
-                # Copia el archivo a la nueva ubicación con nombre normalizado
-                print(f'Copiando: {video_path} -> {newname}')
+                # Copies file to new dest with normalized name
+                print(f'Copying: {video_path} -> {target_folder}')
                 try:
-                    shutil.copy2(video_path, os.path.join(target_folder, newname))
+                    shutil.copy2(video_path, os.path.join(target_folder, file))
                 except Exception as e:
                     print(f'Error while builtin copy: {e}')
                 # print(f'Copiado: {file} -> {target_folder}')
+# Callback
+@app.callback()
+def callback():
+    """
+    Image and video sorting and organizing tool
+    """
 
+# Commands 
+@app.command() 
+def video(src:str='./', dst:str='./sorted/video'):
+    organize_videos(src, dst)
+
+@app.command() 
+def image(src:str='./', dst:str='./sorted/image'):
+    organize_images(src, dst)
 if __name__ == "__main__":
-    source_directory = "./original"
-    destination_directory = "./organizada"
-
-    # organize_images(source_directory, destination_directory)
-    organize_videos(source_directory, destination_directory)
+    app()

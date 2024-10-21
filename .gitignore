@@ -8,6 +8,7 @@ __pycache__/
 
 # tests
 tests*
+sorted*
 # Distribution / packaging
 .Python
 build/
@@ -162,5 +163,5 @@ cython_debug/
 #.idea/
 
 original/
-organizada/
+sorted/
 test/
