@@ -109,7 +109,7 @@ def organize_images(source_dir, dest_dir):
                 # print(f'Copiado: {file} -> {target_folder}')
 
 def organize_videos(source_dir, dest_dir):
-    """Organize images in directories based on metadata."""
+    """Organize videos in directories based on metadata."""
     if not os.path.exists(dest_dir):
         os.makedirs(dest_dir)
 
@@ -163,9 +163,9 @@ def organize_videos(source_dir, dest_dir):
                 os.makedirs(target_folder, exist_ok=True)
 
                 # Copies file to new dest with normalized name
-                print(f'Copying: {video_path} -> {target_folder}')
+                # print(f'Copying: {video_path} -> {target_folder}')
                 try:
-                    shutil.copy2(video_path, os.path.join(target_folder, file))
+                    shutil.copy2(video_path, os.path.join(target_folder, newname))
                 except Exception as e:
                     print(f'Error while builtin copy: {e}')
                 # print(f'Copiado: {file} -> {target_folder}')
@@ -179,10 +179,16 @@ def callback():
 # Commands 
 @app.command() 
 def video(src:str='./', dst:str='./sorted/video'):
+    """
+    Video sorting and organizing tool. Organize videos in directories based on metadata.
+    """
     organize_videos(src, dst)
 
 @app.command() 
 def image(src:str='./', dst:str='./sorted/image'):
+    """
+    Image sorting and organizing tool. Organize images in directories based on metadata.
+    """
     organize_images(src, dst)
 if __name__ == "__main__":
     app()
