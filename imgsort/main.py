@@ -10,8 +10,6 @@ from rich import print
 import typer
 import calendar
 
-app = typer.Typer()
-
 # Internal functions
 def extract_metadata(image_path):
     """Extracts image metadata and returns a dict."""
@@ -169,6 +167,10 @@ def organize_videos(source_dir, dest_dir):
                 except Exception as e:
                     print(f'Error while builtin copy: {e}')
                 # print(f'Copiado: {file} -> {target_folder}')
+
+# Cli Typer
+app = typer.Typer(pretty_exceptions_show_locals=False)
+
 # Callback
 @app.callback()
 def callback():
@@ -190,5 +192,6 @@ def image(src:str='./', dst:str='./sorted/image'):
     Image sorting and organizing tool. Organize images in directories based on metadata.
     """
     organize_images(src, dst)
+    
 if __name__ == "__main__":
     app()
