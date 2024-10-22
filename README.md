@@ -110,7 +110,7 @@ We welcome contributions to improve this tool! Please refer to the CONTRIBUTING.
 
 ### License:
 
-This project is licensed under the MIT License (see [LICENSE] for details).
+This project is licensed under the APACHE 2.0 (see [LICENSE] for details).
 
 [license]: https://github.com/elihu/imgsort/blob/main/LICENSE
 [license-img]: https://img.shields.io/github/license/elihu/imgsort?style=flat&logo=apache
