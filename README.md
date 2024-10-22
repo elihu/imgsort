@@ -11,6 +11,34 @@ Handles video formats like MP4, AVI, etc. (using Hachoir)
 Offers flexibility with various sorting options based on metadata (e.g., date taken, location, camera model)
 Installation:
 
+### How it Works (Image and Video Sorting):
+
+#### Image sorting
+The organize_images function is the heart of the image sorting process. Here's a breakdown of its steps:
+
+1. **Checks Destination Directory:** It verifies if the destination directory exists and creates it if not.
+1. **Loops through Files:** It iterates through all files within the source directory.
+1. **Filters Images:** It checks for image file extensions (JPG, JPEG, PNG, TIFF) before proceeding.
+1. **Extracts Metadata:** It uses the Pillow library to extract metadata like camera model and date taken from the image.
+1. **Handles Missing Dates:** If the standard date tags are missing, it attempts to extract the date using regular expressions from filenames based on patterns commonly used by messaging apps (WhatsApp) or cloud storage services (Google Photos).
+1. **Creates Destination Folder Structure:** Based on the extracted date (year and month), it creates subfolders within the destination directory.
+1. **Creates Unique Filename:** It constructs a new filename combining the extracted date and camera model (if available).
+1. **Copies Files:** It copies the image file to the newly created destination folder with the unique filename.
+
+#### Video sorting
+The *organize_videos* function is the heart of the video sorting process. Here's a breakdown of its steps:
+
+1. **Checks Destination Directory:** It verifies if the destination directory exists and creates it if not.
+1. **Loops through Files:** It iterates through all files within the source directory.
+1. **Filters Videos:** It checks for video file extensions (AVI, MP4, MPG, WMV, MOV) before proceeding.
+1. **Checks File Size:** It skips zero-byte files to avoid unnecessary processing.
+1. **Creates Parser:** It initializes a parser object using the createParser function (specific implementation details might vary depending on the video metadata extraction library used).
+1. **Extracts Metadata:** It uses the parser to extract metadata from the video file, including the creation date. If metadata extraction fails, it continues to the next step.
+1. **Handles Missing Dates:** If the creation date is not found in the metadata, it attempts to extract it from the filename using regular expressions or the file's modification time.
+1. **Creates Destination Folder Structure:** Based on the extracted date (year and month), it creates subfolders within the destination directory.
+1. **Creates Unique Filename:** It constructs a new filename combining the extracted date.
+1. **Copies Files:** It copies the video file to the newly created destination folder with the unique filename.
+
 ### Install dependencies:
 
 The tool is using [Typer](https://typer.tiangolo.com/tutorial/)
@@ -74,34 +102,6 @@ imgsort image
 # Sort videos in a specific directory and place them in a custom destination directory
 imgsort video --src "/path/to/videos" --dst "/path/to/organized_videos"
 ```
-
-### How it Works (Image and Video Sorting):
-
-#### Image sorting
-The organize_images function is the heart of the image sorting process. Here's a breakdown of its steps:
-
-1. **Checks Destination Directory:** It verifies if the destination directory exists and creates it if not.
-1. **Loops through Files:** It iterates through all files within the source directory.
-1. **Filters Images:** It checks for image file extensions (JPG, JPEG, PNG, TIFF) before proceeding.
-1. **Extracts Metadata:** It uses the Pillow library to extract metadata like camera model and date taken from the image.
-1. **Handles Missing Dates:** If the standard date tags are missing, it attempts to extract the date using regular expressions from filenames based on patterns commonly used by messaging apps (WhatsApp) or cloud storage services (Google Photos).
-1. **Creates Destination Folder Structure:** Based on the extracted date (year and month), it creates subfolders within the destination directory.
-1. **Creates Unique Filename:** It constructs a new filename combining the extracted date and camera model (if available).
-1. **Copies Files:** It copies the image file to the newly created destination folder with the unique filename.
-
-#### Video sorting
-The *organize_videos* function is the heart of the video sorting process. Here's a breakdown of its steps:
-
-1. **Checks Destination Directory:** It verifies if the destination directory exists and creates it if not.
-1. **Loops through Files:** It iterates through all files within the source directory.
-1. **Filters Videos:** It checks for video file extensions (AVI, MP4, MPG, WMV, MOV) before proceeding.
-1. **Checks File Size:** It skips zero-byte files to avoid unnecessary processing.
-1. **Creates Parser:** It initializes a parser object using the createParser function (specific implementation details might vary depending on the video metadata extraction library used).
-1. **Extracts Metadata:** It uses the parser to extract metadata from the video file, including the creation date. If metadata extraction fails, it continues to the next step.
-1. **Handles Missing Dates:** If the creation date is not found in the metadata, it attempts to extract it from the filename using regular expressions or the file's modification time.
-1. **Creates Destination Folder Structure:** Based on the extracted date (year and month), it creates subfolders within the destination directory.
-1. **Creates Unique Filename:** It constructs a new filename combining the extracted date.
-1. **Copies Files:** It copies the video file to the newly created destination folder with the unique filename.
 
 <!-- 
 ### Contributing:
