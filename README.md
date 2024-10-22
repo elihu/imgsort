@@ -55,12 +55,14 @@ make uninstall
 The tool comes with two main commands: image and video.
 
 > `imgsort image`: Sorts images within a directory based on metadata.
+> 
 > `imgsort video`: Sorts videos within a directory based on metadata.
 
 For both commands, you can use the following options:
 
 
 > `--src:` Specifies the source directory containing the files to be sorted. Defaults to the current directory (`./`)
+> 
 > `--dst:` Specifies the destination directory where the sorted files will be placed. Defaults to `./sorted/image` for images and `./sorted/video` for videos.
 
 ### Example Usage:
