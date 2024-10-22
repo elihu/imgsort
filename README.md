@@ -113,6 +113,6 @@ We welcome contributions to improve this tool! Please refer to the CONTRIBUTING.
 This project is licensed under the MIT License (see [LICENSE] for details).
 
 [license]: https://github.com/elihu/imgsort/blob/main/LICENSE
-[license-img]: https://img.shields.io/badge/License-Apache%202.0-blue.svg
-[release]: https://github.com/elihu/imgsort/releases
-[release-img]: https://img.shields.io/github/release/elihu/imgsort.svg?logo=github
+[license-img]: https://img.shields.io/github/license/elihu/imgsort?style=flat&logo=apache
+[release]: https://github.com/elihu/imgsort/releases/
+[release-img]: https://img.shields.io/github/v/release/elihu/imgsort?logo=github
