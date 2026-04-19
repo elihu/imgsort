@@ -1,25 +1,40 @@
+"""
+Utility script: stamp sequential EXIF timestamps onto images.
 
-from datetime import timedelta
-from datetime import datetime
+Each file in the source directory receives a timestamp 1 second after
+the previous one, starting from date_orig + 1s.
+
+Supported formats: JPEG, TIFF  (PNG is skipped — piexif does not support it).
+"""
+from __future__ import annotations
+
 import os
-import piexif
-def organize_images(source_dir, date_orig):
-    """ Change metadata with given datetime original."""
+from datetime import datetime, timedelta
+from pathlib import Path
 
+import piexif
+
+_SUPPORTED = frozenset({'.jpg', '.jpeg', '.tiff'})
+
+
+def change_image_times(source_dir: str, date_orig: datetime) -> None:
     for root, _, files in os.walk(source_dir):
-        for file in files:
-            if file.lower().endswith(('jpg', 'jpeg', 'png', 'tiff')):
-                image_path = os.path.join(root, file)
-                exif_dict = piexif.load(image_path)
-                date_orig += timedelta(seconds=1)
-                new_date = date_orig.strftime("%Y:%m:%d %H:%M:%S")
+        for file in sorted(files):
+            if Path(file).suffix.lower() not in _SUPPORTED:
+                continue
+            path = os.path.join(root, file)
+            date_orig += timedelta(seconds=1)
+            new_date = date_orig.strftime('%Y:%m:%d %H:%M:%S').encode()
+            try:
+                exif_dict = piexif.load(path)
                 exif_dict['0th'][piexif.ImageIFD.DateTime] = new_date
                 exif_dict['Exif'][piexif.ExifIFD.DateTimeOriginal] = new_date
                 exif_dict['Exif'][piexif.ExifIFD.DateTimeDigitized] = new_date
-                exif_bytes = piexif.dump(exif_dict)
-                piexif.insert(exif_bytes, image_path)
+                piexif.insert(piexif.dump(exif_dict), path)
+                print(f'Updated: {path}  →  {date_orig}')
+            except Exception as e:
+                print(f'Error processing {path}: {e}')
 
-if __name__ == "__main__":
-    source_directory = "./test"
-    date_orig = datetime(2005, 12, 31, 23, 29, 59)
-    organize_images(source_directory, date_orig)
+
+if __name__ == '__main__':
+    change_image_times('./test', datetime(2005, 12, 31, 23, 29, 59))
