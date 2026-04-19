@@ -1,24 +1,32 @@
-PKG=imgsort-1.0-py3-none-any.whl
-DEPS=typer
-APP_PATH=~/.local/share/imgsort
-APP_DIST=$(APP_PATH)/dist
+PKG      := imgsort-1.1.0-py3-none-any.whl
+APP_PATH := $(HOME)/.local/share/imgsort
 
-prepare:
-	mkdir -p $(APP_PATH)
-	mkdir -p $(APP_DIST)
+.PHONY: help install uninstall dev build clean
 
-build: prepare
+help:
+	@echo "Usage: make <target>"
+	@echo ""
+	@echo "  dev        Install in editable mode for development"
+	@echo "  install    Build wheel and install it system-wide"
+	@echo "  uninstall  Remove the installed package"
+	@echo "  build      Build the wheel only (output: dist/)"
+	@echo "  clean      Remove build artifacts and caches"
+
+dev:
+	pip install --editable ".[all]" 2>/dev/null || pip install --editable .
+
+build:
 	poetry build
-	mv -f dist/$(PKG) $(APP_DIST)/$(PKG)
 
 install: build
-	pip3 install $(APP_DIST)/$(PKG)
-	rm -rf $(APP_DIST)
+	mkdir -p $(APP_PATH)
+	cp dist/$(PKG) $(APP_PATH)/$(PKG)
+	pip3 install $(APP_PATH)/$(PKG)
+	rm -f $(APP_PATH)/$(PKG)
+
+uninstall:
+	pip3 uninstall -y imgsort
 
 clean:
-	rm -rf __pycache__
-	rm -rf $(APP_PATH)
-
-uninstall: clean
-	pip3 uninstall $(APP_DIST)/$(PKG)
-
+	rm -rf dist/ build/ __pycache__ imgsort/__pycache__ tools/__pycache__
+	rm -rf *.egg-info imgsort/*.egg-info
