@@ -31,9 +31,12 @@ sorted/
 
 | Priority | Images | Videos |
 |----------|--------|--------|
-| 1st | EXIF `DateTimeOriginal` / `DateTime` | Hachoir `creation date` |
+| 1st | EXIF `DateTimeOriginal` → `DateTimeDigitized` → `DateTime` | Hachoir `creation date` (UTC → local for MP4/MOV/WMV) |
 | 2nd | Filename pattern (WhatsApp / GPhotos / Screenshot) | — |
 | Last | File modification time | File modification time |
+
+Dates that are zeroed, invalid or in the future are ignored and the next source is tried.
+The destination folder is skipped while scanning, so sorting `./` into `./sorted/` is safe to repeat.
 
 ### Recognized filename patterns
 
@@ -46,23 +49,17 @@ sorted/
 
 ## Requirements
 
-- Python 3.10+
-- [Poetry](https://python-poetry.org) (for building)
+- Python 3.11+
+- [uv](https://docs.astral.sh/uv/)
 
 ## Installation
 
-Clone the repository and build/install with Make:
+Clone the repository and install the CLI globally as a uv tool:
 
 ```bash
 git clone https://github.com/elihu/imgsort.git
 cd imgsort
-make install
-```
-
-For development (editable install):
-
-```bash
-make dev
+make install      # uv tool install .
 ```
 
 To uninstall:
@@ -70,6 +67,18 @@ To uninstall:
 ```bash
 make uninstall
 ```
+
+## Development
+
+```bash
+make dev      # uv sync: create .venv with runtime + dev deps
+make test     # pytest
+make lint     # ruff
+make audit    # pip-audit against the locked dependencies
+make build    # sdist + wheel in dist/
+```
+
+Run the CLI from the checkout without installing it: `uv run imgsort --help`.
 
 ## Usage
 
@@ -117,7 +126,7 @@ imgsort video --help
 `tools/change_time.py` is a standalone utility that stamps sequential EXIF timestamps onto a folder of images (useful for re-dating an unordered batch). Supports JPEG and TIFF; PNG is skipped (piexif limitation).
 
 ```bash
-python tools/change_time.py
+uv run python tools/change_time.py
 ```
 
 Edit the `__main__` block to set the source directory and starting date.
