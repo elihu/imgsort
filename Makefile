@@ -1,32 +1,42 @@
-PKG      := imgsort-1.1.0-py3-none-any.whl
-APP_PATH := $(HOME)/.local/share/imgsort
-
-.PHONY: help install uninstall dev build clean
+.PHONY: help dev test lint fix audit build install uninstall clean
 
 help:
 	@echo "Usage: make <target>"
 	@echo ""
-	@echo "  dev        Install in editable mode for development"
-	@echo "  install    Build wheel and install it system-wide"
-	@echo "  uninstall  Remove the installed package"
-	@echo "  build      Build the wheel only (output: dist/)"
+	@echo "  dev        Create .venv with all deps (uv sync)"
+	@echo "  test       Run the test suite"
+	@echo "  lint       Run ruff checks"
+	@echo "  fix        Apply ruff autofixes"
+	@echo "  audit      Scan locked dependencies for known vulnerabilities"
+	@echo "  build      Build sdist and wheel (output: dist/)"
+	@echo "  install    Install the CLI globally as a uv tool"
+	@echo "  uninstall  Remove the globally installed CLI"
 	@echo "  clean      Remove build artifacts and caches"
 
 dev:
-	pip install --editable ".[all]" 2>/dev/null || pip install --editable .
+	uv sync
+
+test:
+	uv run pytest
+
+lint:
+	uv run ruff check .
+
+fix:
+	uv run ruff check --fix .
+
+audit:
+	uv export --no-dev --no-emit-project --format requirements.txt | uv run pip-audit --strict -r /dev/stdin --disable-pip
 
 build:
-	poetry build
+	uv build
 
-install: build
-	mkdir -p $(APP_PATH)
-	cp dist/$(PKG) $(APP_PATH)/$(PKG)
-	pip3 install $(APP_PATH)/$(PKG)
-	rm -f $(APP_PATH)/$(PKG)
+install:
+	uv tool install --force .
 
 uninstall:
-	pip3 uninstall -y imgsort
+	uv tool uninstall imgsort
 
 clean:
-	rm -rf dist/ build/ __pycache__ imgsort/__pycache__ tools/__pycache__
-	rm -rf *.egg-info imgsort/*.egg-info
+	rm -rf dist/ build/ .pytest_cache/ .ruff_cache/
+	find . -type d -name __pycache__ -not -path './.venv/*' -exec rm -rf {} +
