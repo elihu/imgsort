@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from pathlib import Path
+
 import typer
 
 from .image import organize_images
@@ -13,9 +15,12 @@ app = typer.Typer(
 
 @app.command()
 def image(
-    src: str = typer.Argument('./', help='Source directory to scan for images.'),
-    dst: str = typer.Option(
-        './sorted/image', '--dst', '-d',
+    src: Path = typer.Argument(
+        Path('./'), exists=True, file_okay=False, readable=True,
+        help='Source directory to scan for images.',
+    ),
+    dst: Path = typer.Option(
+        Path('./sorted/image'), '--dst', '-d',
         help='Destination directory for sorted images.',
     ),
 ) -> None:
@@ -24,7 +29,7 @@ def image(
 
     \b
     Date resolution priority:
-      1. EXIF metadata  (DateTimeOriginal or DateTime)
+      1. EXIF metadata  (DateTimeOriginal, DateTimeDigitized or DateTime)
       2. Filename pattern  (WhatsApp, Screenshot, Google Photos)
       3. File modification time  (last resort)
     """
@@ -33,9 +38,12 @@ def image(
 
 @app.command()
 def video(
-    src: str = typer.Argument('./', help='Source directory to scan for videos.'),
-    dst: str = typer.Option(
-        './sorted/video', '--dst', '-d',
+    src: Path = typer.Argument(
+        Path('./'), exists=True, file_okay=False, readable=True,
+        help='Source directory to scan for videos.',
+    ),
+    dst: Path = typer.Option(
+        Path('./sorted/video'), '--dst', '-d',
         help='Destination directory for sorted videos.',
     ),
 ) -> None:
